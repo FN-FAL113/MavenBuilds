@@ -1,0 +1,45 @@
+name: Auto Deploy Maven
+
+on:
+  # Manual workflow trigger
+  workflow_dispatch: {}
+
+  # Run every ~30 minutes
+  schedule:
+  - cron: '*/30 * * * *'
+  
+  
+jobs:
+  build:
+
+    name: Auto Deploy Maven
+    runs-on: ubuntu-latest
+    env:
+      API_KEY: ${{ secrets.API_KEY }}
+      EMAIL: ${{ secrets.EMAIL }}
+      ACTION_NAME: ${GITHUB_WORKFLOW}
+      RUN_ID: ${GITHUB_RUN_NUMBER}
+
+    steps:
+    
+    - name: Checking out Repository
+      uses: actions/checkout@v3
+      
+    - name: Setting up Java 17
+      uses: actions/setup-java@v3.4.1
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+        java-package: jdk
+        architecture: x64        
+      
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+          node-version: '16.x'
+          
+    - name: Installing node dependencies      
+      run: npm install
+      
+    - name: Running builder
+      run: npm start

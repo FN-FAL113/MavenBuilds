@@ -36,13 +36,13 @@ other target repos for build output directory creation and so on.
 ### 4. Maven Build
 After successfully creating the build output directories which means there are<br/>
 new changes from our target repo, a maven lifecycle build gets initiated using<br/>
-'clean package' as the command. The logs for the build gets outputted in the root<br/>
-directory of the target repo. 
+'clean package' (change inside main.js) as the command. The logs for the build <br/>
+gets outputted in the rootdirectory of the target repo. 
 
 ### 5. Transferring build files
-Build files including the packaged jar and build.txt get transferred to the<br/>
-aforementioned build output directory above specifically inside the current<br/>
-commit hash for each individual target repo.
+If the build for a repo is successfull then build files including the packaged<br/>
+jar and build.txt else only build.txt get transferred to the aforementioned build output<br/>
+directory above specifically inside the curren commit hash for each individual target repo.
 
 ### 6. Commit to build repo
 Lastly, we commit our changes to the builds repo (this current page as an example),<br/>

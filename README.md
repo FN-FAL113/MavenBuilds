@@ -61,7 +61,7 @@ can change the builds repo and add target repositories<br/><br/>
  
 3. Run ```npm install```
 
-4. Assign your own builds and target github repos
+4. Assign your own builds and target github repos inside app.js
 
 5. Change the maven build life cycle command if necessary inside main.js
 

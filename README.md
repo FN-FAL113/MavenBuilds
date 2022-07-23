@@ -12,6 +12,7 @@ in a primitive array and queued for cloning. If there are local repositories<br/
 cached, it will be automatically deleted before starting the cloning process
 
 Cloned repositories directory:
+
 ``./repos/{username}/<cloned repo dirs>``<br/>
 
 ### 2. Setting pom final name

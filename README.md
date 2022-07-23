@@ -9,7 +9,7 @@ This current build repo gets cloned and used as local directory<br/>
 for other target repos that will be worked on which are retrieved<br/>
 from hardcoded repositories inside the app.js file that are stored<br/>
 in a primitive array and queued for cloning. If there are local repositories<br/>
-cached, it will be automatically deleted before starting the cloning process
+cached, it will be automatically deleted before starting the cloning process.
 
 Cloned repositories directory:
 ``./repos/{username}/<cloned repo dirs>``<br/>
@@ -18,7 +18,7 @@ Cloned repositories directory:
 Onced a target repo gets cloned, the maven pom.xml for each repository<br/>
 gets parsed as jsonObject where the build.finalName will be set<br/>
 as "project.name vproject.version" and be used as the package name<br/>
-for the jar after compilation
+for the jar after compilation.
 
 ### 3. Creation of build output directories
 Before proceeding to maven build, build output directories are created<br/>

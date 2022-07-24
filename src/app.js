@@ -4,20 +4,12 @@ const {start, cloneRepo, buildAndTransferFiles, commitToBuilds} = require('./mai
 
 require('dotenv').config();
 
-const username = 'FN-FAL113' // change this to your github username
-const repo1 = "FN-FAL-s-Amplifications"
-const repo2 = "RelicsOfCthonia"
-const branch = 'main'; // change this to the branch you want
-
-const buildsRepo = "MavenBuilds"; // change this to the repo where the packaged jar will be committed to
-const repoArray = [buildsRepo, repo1, repo2] // index 0 should be the main builds repo where package jar and files will be commited
-
 function startTask(){ 
-    start(username, repoArray, branch)
-        .then(() => cloneRepo(username, repoArray, branch))
-            .then(() => buildAndTransferFiles(username, repoArray, branch))
-                .then(() => commitToBuilds(username, buildsRepo))
+    start()
+        .then((repos) => cloneRepo(repos))
+            .then((repos) => buildAndTransferFiles(repos))
+                .then((repos) => commitToBuilds(repos))
 }
 
-startTask();
-  
+
+startTask();  

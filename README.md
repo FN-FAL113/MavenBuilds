@@ -51,9 +51,33 @@ packaged jar and build.txt log file that are stored in the build<br/>
 directories which will get reflected upon git commit and git push<br/>
 
 ## Assigning builds repo and target repos
-This is inside from the ```./src/app.js``` from where you<br/>
-can change the builds repo and add target repositories<br/><br/>
-<img src="https://user-images.githubusercontent.com/88238718/180372206-e53b1561-701e-41cf-a282-bad773df002d.png" width="800px" heigh="650px">
+Inside ```./resources/repos.json```, where you will be adding the needed builds repo and target repos<br/>
+Contents are inside a json literal array<br/>
+```
+[
+    /* index 0 of this json array that serves as your main builds repo
+     * where the packaged jar and other files will be committed
+    /* 
+    {
+        "github_username": "FN-FAL113",
+        "repository": "MavenBuilds",
+        "branch": "main"
+    },
+    /* index 1 above are your target java maven repos 
+     * each repository should be added per index inside this json array
+    /* keep in mind, index 0 should be the main builds repository
+    { 
+        "github_username": "FN-FAL113",
+        "repository": "FN-FAL-s-Amplifications",
+        "branch": "main"
+    },
+    {
+        "github_username": "FN-FAL113",
+        "repository": "RelicsOfCthonia",
+        "branch": "main"
+    }
+]
+```
 
 ## Usage
 1. Clone this maven builds repo then extract the zip file
@@ -62,7 +86,7 @@ can change the builds repo and add target repositories<br/><br/>
  
 3. Run ```npm install```
 
-4. Assign your own builds and target github repos inside app.js
+4. Assign your own builds and target github repos inside ```/resources/repos.json```
 
 5. Change the maven build life cycle command if necessary inside main.js
 

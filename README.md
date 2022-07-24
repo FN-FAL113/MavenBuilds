@@ -7,22 +7,23 @@
 ### 1. Cloning
 This current build repo gets cloned and used as local directory<br/>
 for other target repos that will be worked on which are retrieved<br/>
-from hardcoded repositories inside the app.js file that are stored<br/>
-in a primitive array and queued for cloning. If there are local repositories<br/>
-cached, it will be automatically deleted before starting the cloning process
+inside the ```./resources/repos.json file<br/>
+Each index starting from index 1 are queued for cloning<br/>
+If there are local repositories cached, it will be<br/>
+automatically deleted before starting the cloning process
 
 Cloned repositories directory:
 
 ``./repos/{username}/<cloned repo dirs>``<br/>
 
 ### 2. Setting pom final name
-Onced a target repo gets cloned, the maven pom.xml for each repository<br/>
-gets parsed as jsonObject where the build.finalName will be set<br/>
+Once a target repo gets cloned, the maven pom.xml for each repository<br/>
+is parsed as jsonObject where the build.finalName will be set<br/>
 as "project.name vproject.version" and be used as the package name<br/>
-for the jar after compilation
+for the jar after a successful maven lifecycle build
 
 ### 3. Creation of build output directories
-Before proceeding to maven build, build output directories are created<br/>
+Before proceeding to maven lifecycle build, build output directories are created<br/>
 inside the clone of our said builds repo where it takes the username,<br/>
 targetRepo, branch and the currentCommit hash as the subdirectories.
 
@@ -30,9 +31,9 @@ Build output Directory:
 ``./repos/{username}/{buildsRepo}/repos/{username}/{repo}/{branch}/{currentCommitHash}``<br/>
 
 If the current commit hash from the target repo exist as a subdirectory<br/>
-then maven build will be skipped since there are no new commits from our<br/>
-target repo clone. Any skipped target repos automatically proceeds to<br/>
-other target repos for build output directory creation and so on.
+then maven build for that specific repo is skipped since there are no new commits<br/>
+Any skipped target repos automatically proceeds to other<br/>
+target repos for build output directory creation and so on.
 
 ### 4. Maven Build
 After successfully creating the build output directories which means there are<br/>
@@ -43,12 +44,12 @@ root directory of the target repo.
 ### 5. Transferring build files
 If the build for a repo is successfull then build files including the packaged<br/>
 jar and build.txt else only build.txt get transferred to the aforementioned build<br/>
-output directory above specifically.
+output directory above.
 
 ### 6. Commit to build repo
 Lastly, we commit our changes to the builds repo, the changes includes our<br/>
-packaged jar and build.txt log file that are stored in the build<br/>
-directories which will get reflected upon git commit and git push<br/>
+transferred build files that are stored in the build output<br/>
+directories which will get reflected upon git commit and git push.<br/>
 
 ## Assigning builds repo and target repos
 Inside ```./resources/repos.json```, where you will be adding the needed builds repo and target repos<br/>

@@ -11,43 +11,56 @@ const {access, rm, readFile, writeFile} = require('fs');
 const path = require('path');
 const xml2js = require('xml2js');
 
-const start = (username = null, repo = null, branch = null) => {
+
+const start = () => {
+    return getRepoResource()
+}
+
+function getRepoResource(){
     return new Promise((resolve, reject) =>{
-        if(repo.length < 1 || username == null || branch == null){
-            reject('Parameters cannot be null!')
-        }
+        readFile('./resources/repos.json', 'utf8', function (error, data) {
+            if (error){
+                console.error(`\nGet repos.json error encountered`)
+
+                reject()
+            }
     
-        resolve()
+            resolve(JSON.parse(data))
+        })
     })
 }
 
-function cloneRepo(username = null, repo, branch){
+function cloneRepo(repos){
     return new Promise((resolve, reject) =>{    
         const deleteDirpromises = []; 
         const clonePromises = []; 
 
-        for(let i = 0; i < repo.length; i++) { // store deleteDir promises in array
+        for(let i = 0; i < repos.length; i++) { // push deleteDir promises in array
             if(i != 0){
                 deleteDirpromises.push(
-                    delDirectoryIfExist(`./repos/${username}/${repo[i]}`)
+                    delDirectoryIfExist(`./repos/${repos[i].github_username}/${repos[i].repository}`)
                 )
             }
         } 
 
         Promise.all(deleteDirpromises).then(() => {
-            for(let i = 0; i < repo.length; i++) {
-                // we loop through the repositories and check if it has a stored locally 
+            for(let i = 0; i < repos.length; i++) {
+                // we loop through repos.json and check if it has a stored locally 
                 // if it exist then it gets deleted and a new clone gets initiated
-                clonePromises.push(new Promise((resolve, reject) => { // store gitClone promises in array
-                   child_proc.exec(`git clone https://${username}:${process.env.API_KEY}@github.com/${username}/${repo[i]}.git repos/${username}/${repo[i]}`, (error, stdout, stderr) => {                    
-                        console.log(`Cloning ${repo[i]}!`);
+                const repo = repos[i].repository
+                const repoOwner = repos[i].github_username
+                const branch = repos[i].branch
+
+                clonePromises.push(new Promise((resolve, reject) => { // push gitClone promises in array
+                   child_proc.exec(`git clone -b ${branch} https://${repos[0].github_username}:${process.env.API_KEY}@github.com/${repoOwner}/${repo}.git repos/${repoOwner}/${repo}`, (error, stdout, stderr) => {                    
+                        console.log(`\nCloning ${repo}!`);
                        
                         i == 0 ? reject() : resolve()
                    })
-                }).then(() => setPomFinalName(username, repo[i])).catch(() => console.log('Skipping setPom for the builds repo')))
+                }).then(() => setPomFinalName(repoOwner, repo)).catch(() => console.log(`\nSkipping setPom for the builds repo`)))
             }
    
-            Promise.all(clonePromises).then(() => resolve())
+            Promise.all(clonePromises).then(() => resolve(repos))
         })
     }).catch(() => console.error('Clone repo error encountered'))
 }
@@ -62,7 +75,7 @@ function delDirectoryIfExist(path){
             }
 
             rm(path, { maxRetries: 5, retryDelay: 2000, recursive: true, force: true }, (err) => {
-                console.log(`Deleting local repo: ${path}`)
+                console.log(`\nDeleting local repo: ${path}`)
 
                 resolve()
             }) 
@@ -76,7 +89,7 @@ function setPomFinalName(username, repo){
         // read XML file
          readFile(`./repos/${username}/${repo}/pom.xml`, "utf-8", (error, data) => {
             if (error) {
-                console.error(`ReadFile ${repo} pom.xml error encountered`)
+                console.error(`\nReadFile ${repo} pom.xml error encountered: ` + error)
 
                 reject()
             }
@@ -84,7 +97,7 @@ function setPomFinalName(username, repo){
             // convert XML data to JSON object
             xml2js.parseString(data, (err, result) => {
                 if (err) {
-                    console.error(`Parse ${repo} pom.xml to jsonObject error encountered`)
+                    console.error(`\nParse ${repo} pom.xml to jsonObject error encountered`)
 
                     reject()
                 }
@@ -99,12 +112,12 @@ function setPomFinalName(username, repo){
                 // overrites the pom file, we don't want to append it
                 writeFile(`./repos/${username}/${repo}/pom.xml`, xml, (error) => {
                     if (error) {
-                        console.error(`Write ${repo} parsed jsonObject to pom.xml error encountered`)
+                        console.error(`\nWrite ${repo} parsed jsonObject to pom.xml error encountered`)
 
                         reject()
                     }
                     
-                    console.log(`Updated ${repo} pom.xml is written to a new file`);
+                    console.log(`\nSuccessfully updated ${repo} pom.xml`);
                     resolve()
                 });
 
@@ -114,15 +127,20 @@ function setPomFinalName(username, repo){
     }).catch(() => console.error('Set pom final name error encountered' /* + error */))
 }
 
-function buildAndTransferFiles(username, repo, branch){
+function buildAndTransferFiles(repos){
     return new Promise((resolve, reject) =>{
         const promises = []
 
         try{
-            for(let i = 1; i < repo.length; i++) {
-                console.log('Compiling ' + repo[i])
+            for(let i = 1; i < repos.length; i++) {
+                const repo = repos[i].repository
+                const repoOwner = repos[i].github_username
+                const branch = repos[i].branch
+                const buildsRepo = repos[0].repository
 
-                promises.push(createRepoDir(username, repo[i], repo[0], branch)
+                console.log(`\nCompiling ${repo}`)
+
+                promises.push(createRepoDir(repoOwner, repo, branch, buildsRepo)
                     .then((isExistingCommit) => new Promise((resolve, reject) => {
 
                             if(isExistingCommit){
@@ -133,34 +151,34 @@ function buildAndTransferFiles(username, repo, branch){
                             
                             mvn.create({
                                 // the working directory that maven will build upon
-                                cwd: `./repos/${username}/${repo[i]}`,
-                            }).execute(['clean', 'package' ,`-lbuild.txt`], { 'skipTests': false }).then(() => {
-                                console.log(`Successfully compiled ${repo[i]}`)
+                                cwd: `./repos/${repoOwner}/${repo}`,
+                            }).execute(['clean', 'package' ,`-lbuild.txt`], { 'skipTests': true }).then(() => {
+                                console.log(`\nSuccessfully compiled ${repo}`)
 
                                 resolve(false)
                             }).catch(() => {
-                                console.log(`Unsuccessfully compiled ${repo[i]}`)
+                                console.log(`\nUnsuccessfully compiled ${repo}`)
                                 
-                                moveLogFile(username, repo[i], branch)
+                                moveLogFile(repoOwner, repo, branch, buildsRepo)
 
                                 reject(true)
                             })
                         })
 
-                    ).then(() => moveJarFile(username, repo[i], branch))
-                        .then(() => moveLogFile(username, repo[i], branch))
-                            .catch((failBuild) => console.log(failBuild ? `${repo[i]} failed build, check build.txt for more info` : `Skipped compiling ${repo[i]} due to no new commits`))
+                    ).then(() => moveJarFile(repoOwner, repo, branch, buildsRepo))
+                        .then(() => moveLogFile(repoOwner, repo, branch, buildsRepo))
+                            .catch((failBuild) => console.log(failBuild ? `\n${repo} failed build, check build.txt for more info` : `\nSkipped compiling ${repo} due to no new commits`))
                 )       
             }
 
-            Promise.all(promises).then(() => resolve())
+            Promise.all(promises).then(() => resolve(repos))
         } catch(error){
             console.error('Maven compile error encountered' /* + error */)  
         }
-    });
+    })
 }
 
-function createRepoDir(username, repo, buildsRepo, branch){
+function createRepoDir(username, repo, branch, buildsRepo){
     return new Promise((resolve, reject) => {
         const currentCommit = getCurrentCommitHash(username, repo)
         const mkdirArgs = `mkdir "./repos" "./repos/${username}" "./repos/${username}/${repo}" "./repos/${username}/${repo}/${branch}" "./repos/${username}/${repo}/${branch}/${currentCommit}"`
@@ -168,7 +186,7 @@ function createRepoDir(username, repo, buildsRepo, branch){
         access(`./repos/${username}/${buildsRepo}/repos/${username}/${repo}/${branch}/${currentCommit}`, (error) => {
             if(error){ // path doesn't exist, proceed to compilation
                 child_proc.exec(`cd ./repos/${username}/${buildsRepo} && ${mkdirArgs}`, (error, stdout, stderr) => {
-                    console.log(`${repo} build output directory created`)
+                    console.log(`\n${repo} build output directory created`)
         
                     resolve(false)
                 })
@@ -179,11 +197,11 @@ function createRepoDir(username, repo, buildsRepo, branch){
     })
 }
 
-function moveJarFile(username, repo, branch){
+function moveJarFile(username, repo, branch, buildsRepo){
     return new Promise((resolve, reject) => {
         pomParser.parse({ filePath: path.join(__dirname, '../') + `/repos/${username}/${repo}/pom.xml` }, (error, pomResponse) => {
             if (error) {
-                console.error(`${repo} pom parse error encountered`);
+                console.error(`\n${repo} pom parse error encountered`);
 
                 reject()
             }
@@ -192,39 +210,39 @@ function moveJarFile(username, repo, branch){
             
             const jarName = `"` + pomObject.name + " v" + pomObject.version + ".jar" + `"`
    
-            const moveJarFileArgs = `cd ./repos/${username}/${repo}/target && mv ${jarName} ../../MavenBuilds/repos/${username}/${repo}/${branch}/${getCurrentCommitHash(username, repo)}` 
+            const moveJarFileArgs = `cd ./repos/${username}/${repo}/target && mv ${jarName} ../../${buildsRepo}/repos/${username}/${repo}/${branch}/${getCurrentCommitHash(username, repo)}` 
 
             child_proc.exec(`${moveJarFileArgs}`, (error, stdout, stderr) => {
                 if (error) {            
-                    console.error(`Error encountered while transferring ${repo} jar file`);
+                    console.error(`\nError encountered while transferring ${repo} jar file`);
 
                     reject()
                 } else {
-                    console.log(`Successfully transferred ${repo} jar file`)
+                    console.log(`\nSuccessfully transferred ${repo} jar file`)
 
                     resolve()
                 }  
             })     
         })
-    }).catch((error) => console.error('Move jar file error encountered' /* + error */))
+    }).catch(() => console.error('Move jar file error encountered' /*+ error */))
 }
 
-function moveLogFile(username, repo, branch){
+function moveLogFile(username, repo, branch, buildsRepo){
     return new Promise((resolve, reject) => {
-        const moveBuildLogArgs = `cd ./repos/${username}/${repo} && mv "build.txt" ../MavenBuilds/repos/${username}/${repo}/${branch}/${getCurrentCommitHash(username, repo)}`
+        const moveBuildLogArgs = `cd ./repos/${username}/${repo} && mv "build.txt" ../${buildsRepo}/repos/${username}/${repo}/${branch}/${getCurrentCommitHash(username, repo)}`
 
         child_proc.exec(`${moveBuildLogArgs}`, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error encountered while transferring ${repo} build logs!`)
+                console.error(`\nError encountered while transferring ${repo} build logs!`)
 
                 reject()    
             } else {
-                console.log(`Successfully transferred ${repo} build logs`)
+                console.log(`\nSuccessfully transferred ${repo} build logs`)
 
                 resolve()
             }
         })
-    }).catch((error) => console.error('Move log file error encountered' /* + error */))
+    }).catch(() => console.error('Move log file error encountered' /* + error */ ))
 }
 
 function getCurrentCommitHash(username, repo){
@@ -234,20 +252,18 @@ function getCurrentCommitHash(username, repo){
     return commitHash
 }
 
-function commitToBuilds(username, buildsRepo){
+function commitToBuilds(repos){
     return new Promise((resolve, reject) => {
-        child_proc.exec(`cd ./repos/${username}/${buildsRepo}/ && git config user.name FN-FAL113 && git config user.email ${process.env.EMAIL} && git add . && git commit -m "${process.env.ACTION_NAME} #${process.env.RUN_ID}" && git push origin`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error encountered while committing changes to ${buildsRepo} repo!`);  
-                
-                reject()
+        child_proc.exec(`cd ./repos/${repos[0].github_username}/${repos[0].repository}/ && git config user.name FN-FAL113 && git config user.email ${process.env.EMAIL} && git add . && git commit -m "${process.env.ACTION_NAME} #${process.env.RUN_ID}" && git push origin`, (error, stdout, stderr) => {
+            if (error) {         
+                reject(`\nNothing to commit on ${repos[0].repository} remote repository`)
             } else {
-                console.log(`Successfully committed changes to ${buildsRepo} repo!`)
+                console.log(`\nSuccessfully committed changes ${repos[0].repository} remote repository!`)
 
                 resolve()
             }
         })
-    }).catch((error) => console.error('Commit to builds error encountered' /*+ error*/))
+    }).catch((error) => console.error(error))
 }
 
 module.exports = { start, cloneRepo, buildAndTransferFiles, commitToBuilds}

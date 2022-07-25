@@ -254,7 +254,7 @@ function getCurrentCommitHash(username, repo){
 
 function commitToBuilds(repos){
     return new Promise((resolve, reject) => {
-        child_proc.exec(`cd ./repos/${repos[0].github_username}/${repos[0].repository}/ && git config user.name FN-FAL113 && git config user.email ${process.env.EMAIL} && git add . && git commit -m "${process.env.ACTION_NAME} #${process.env.RUN_ID}" && git push origin`, (error, stdout, stderr) => {
+        child_proc.exec(`cd ./repos/${repos[0].github_username}/${repos[0].repository}/ && git config user.name FN-FAL113 && git config user.email ${process.env.EMAIL} && git add . && git commit -S -m "${process.env.ACTION_NAME} #${process.env.RUN_ID}" && git push origin`, (error, stdout, stderr) => {
             if (error) {         
                 reject(`\nNothing to commit on ${repos[0].repository} remote repository`)
             } else {

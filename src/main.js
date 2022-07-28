@@ -181,7 +181,7 @@ function buildAndTransferFiles(repos){
 
 function checkCommitMessage(repoOwner, repo){
     return new Promise((resolve, reject) => {
-        const commitMessage = child_proc.execSync(`cd ./repos/${repoOwner}/${repo} && git log -1 --pretty=%B`).toString().trim()
+        const commitMessage = child_proc.execSync(`cd ./repos/${repoOwner}/${repo} && git log --format=%B -n 1`).toString().trim()
 
         if(commitMessage.includes('[ci skip]') || commitMessage.includes('[CI SKIP]')){
             console.log(`\nSkipping ${repo} build because of commit message`)

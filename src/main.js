@@ -140,7 +140,8 @@ function buildAndTransferFiles(repos){
 
                 console.log(`\nCompiling ${repo}`)
 
-                promises.push(createRepoDir(repoOwner, repo, branch, buildsRepo)
+                promises.push(checkCommitMessage(repoOwner, repo)
+                    .then(() => createRepoDir(repoOwner, repo, branch, buildsRepo))
                     .then((isExistingCommit) => new Promise((resolve, reject) => {
 
                             if(isExistingCommit){
@@ -155,7 +156,7 @@ function buildAndTransferFiles(repos){
                             }).execute(['clean', 'package' ,`-lbuild.txt`], { 'skipTests': true }).then(() => {
                                 console.log(`\nSuccessfully compiled ${repo}`)
 
-                                resolve(false)
+                                resolve()
                             }).catch(() => {
                                 console.log(`\nUnsuccessfully compiled ${repo}`)
                                 
@@ -174,6 +175,20 @@ function buildAndTransferFiles(repos){
             Promise.all(promises).then(() => resolve(repos))
         } catch(error){
             console.error('Maven compile error encountered' /* + error */)  
+        }
+    })
+}
+
+function checkCommitMessage(repoOwner, repo){
+    return new Promise((resolve, reject) => {
+        const commitMessage = child_proc.execSync(`cd ./repos/${repoOwner}/${repo} && git log -1 --pretty=%B`).toString().trim()
+
+        if(commitMessage.includes('[ci skip]') || commitMessage.includes('[CI SKIP]')){
+            console.log(`\nSkipping ${repo} build because of commit message`)
+
+            reject(false)
+        } else {
+            resolve()
         }
     })
 }

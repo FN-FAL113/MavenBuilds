@@ -29,12 +29,13 @@ async function start(){
    
     await getLocalDirRecursively(`./repos/${repos[1]}/repos/`)
 
+    // use dir.split('\\') for windows, dir.split('/') for linux
     for(const dir of commitHash){
         console.log(`\nProcessing commit directory: ` + dir)
         
-        const buildFilesArray = await getBuildFiles(dir.split('\\'))
+        const buildFilesArray = await getBuildFiles(dir.split('/'))
         
-        await setupBuildsPage(dir.split('\\'), buildFilesArray)
+        await setupBuildsPage(dir.split('/'), buildFilesArray)
     }
 
     console.log(`\nFinished all task!`)
@@ -125,7 +126,6 @@ function getBuildFiles(dir){
 
 function setupBuildsPage(dir, buildFilesArray){
     return new Promise(async (resolve, reject) =>{
-        console.log(dir)
         const user = dir[3]
         const repo = dir[4]
         const commitHash = dir[6]

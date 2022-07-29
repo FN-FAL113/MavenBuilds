@@ -4,12 +4,11 @@ const {start, cloneRepo, buildAndTransferFiles, commitToBuilds} = require('./mai
 
 require('dotenv').config();
 
+startTask();  
+
 function startTask(){ 
     start()
         .then((repos) => cloneRepo(repos))
             .then((repos) => buildAndTransferFiles(repos))
                 .then((repos) => commitToBuilds(repos))
 }
-
-
-startTask();  

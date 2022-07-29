@@ -2,6 +2,8 @@
 
 "Continous Integration/Deployment Service" for java maven packages
 
+Gets served/deployed in my personal website everytime a successful build push is initiated
+
 ## Brief explaination on how it works
 
 ### 1. Cloning
@@ -28,6 +30,7 @@ inside the clone of our said builds repo where it takes the username,<br/>
 targetRepo, branch and the currentCommit hash as the subdirectories.
 
 Build output Directory:
+
 ``./repos/{username}/{buildsRepo}/repos/{username}/{repo}/{branch}/{currentCommitHash}``<br/>
 
 If the current commit hash from the target repo exist as a subdirectory<br/>

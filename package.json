@@ -4,13 +4,16 @@
   "description": "Clones a maven repository and builds it",
   "main": "app.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "deploy": "node src/deployPages.js"
   },
   "author": "FN_FAL113",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "dotenv": "^16.0.1",
+    "jsdom": "^20.0.0",
     "maven": "^5.0.0",
+    "node-fetch": "^2.6.7",
     "pom-parser": "^1.2.0",
     "xml2js": "^0.4.23"
   },

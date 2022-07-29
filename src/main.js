@@ -284,4 +284,4 @@ function commitToBuilds(repos){
     }).catch((error) => console.error(error))
 }
 
-module.exports = { start, cloneRepo, buildAndTransferFiles, commitToBuilds}
+module.exports = { start, cloneRepo, buildAndTransferFiles, commitToBuilds, delDirectoryIfExist }

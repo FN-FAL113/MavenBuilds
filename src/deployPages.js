@@ -125,6 +125,7 @@ function getBuildFiles(dir){
 
 function setupBuildsPage(dir, buildFilesArray){
     return new Promise(async (resolve, reject) =>{
+        console.log(dir)
         const user = dir[3]
         const repo = dir[4]
         const commitHash = dir[6]

@@ -142,16 +142,16 @@ function setupBuildsPage(dir, buildFilesArray){
         }
 
         if(!dom.window.document.querySelector(`div.${repo.toLowerCase()}`).innerHTML.includes(commitHash)){
-         const commitData = await getCommitDetails(user, repo, commitHash)
-         const domFinal = await appendToAddonDiv(dom, dir, buildFilesArray, commitData)
+            const commitData = await getCommitDetails(user, repo, commitHash)
+            const domFinal = await appendToAddonDiv(dom, dir, buildFilesArray, commitData)
 
-         await parseToFile(domFinal, repo, commitHash)
+            await parseToFile(domFinal, repo, commitHash)
 
-         resolve()
+            resolve()
         } else { 
-            reject()
+            reject(`\nSkipping existing commit hash build: ${commitHash}`)
         }
-    }).catch(() => console.error(`Setup builds page error enountered`))
+    }).catch((error) => console.error(error))
 }
 
 async function getCommitDetails(user, repo, commitHash){
@@ -214,7 +214,7 @@ function innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData){
                 <div class="modal-content bgOpaqueDarkModal com-${commitHashLowerCase}">
                     
                     <div class="modal-header border-bottom border-primary" style="border: none;">
-                        <h5 class="modal-title mx-auto" id="exampleModalLabel">Commit #${commitHash}</h5>
+                        <h5 class="modal-title mx-auto" id="exampleModalLabel"><a href="https://github.com/${user}/${repo}/commit/${commitHash}" target="_blank">Commit #${commitHash}</a></h5>
                         <button type="button" class="close btn btn-info" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">X</span>
                         </button>

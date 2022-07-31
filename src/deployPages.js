@@ -11,8 +11,11 @@ const child_proc = require('child_process')
 const { JSDOM } = require("jsdom");
 const { delDirectoryIfExist } = require('./main')
 
+require('dotenv').config()
+
 let dom = null;
 let commitHash = []
+let sortedCommitHash = []
 
 const repoOwner = "FN-FAL113"
 const repos = ['FN_FAL113-Pages', 'MavenBuilds']
@@ -29,18 +32,30 @@ async function start(){
    
     await getLocalDirRecursively(`./repos/${repos[1]}/repos/`)
 
+    commitHash = await sortByDate()
+
     // use dir.split('\\') for windows, dir.split('/') for linux
     for(const dir of commitHash){
-        console.log(`\nProcessing commit directory: ` + dir)
+        console.log(`\nProcessing commit: ` + dir.directory + "\nDate:" + dir.date)
         
-        const buildFilesArray = await getBuildFiles(dir.split('/'))
+       const buildFilesArray = await getBuildFiles(dir.directory.split('/'))
         
-        await setupBuildsPage(dir.split('/'), buildFilesArray)
+       await setupBuildsPage(dir, buildFilesArray)
     }
 
     console.log(`\nFinished all task!`)
 
     await commitToBuildsPage()
+}
+
+function sortByDate(){
+    return new Promise((resolve, reject) =>{
+        commitHash.sort((a, b) =>{
+            return new Date(b.date) - new Date(a.date)
+        }).reverse()
+
+        resolve(commitHash)
+    }).catch(() => console.error(`Sort by date error enountered`))
 }
 
 function cloneRepos(repoOwner, repos){
@@ -80,9 +95,18 @@ function getLocalDirRecursively(dir){
                 if(fs.lstatSync(currentDirectory).isDirectory()){    
                     await getLocalDirRecursively(currentDirectory)
                 } else {
-                    if(!commitHash.includes(dir)){
-                        commitHash.push(dir)
-                    } 
+                    const dirArray = dir.split('/')
+                    const user = dirArray[3]
+                    const repo = dirArray[4]
+                    const commit_hash = dirArray[6]
+
+                    const commitData = await getCommitDetails(user, repo, commit_hash)
+
+                    const dirData = { directory: `${dir}`, date: `${commitData.commit.author.date}`, commit_message: `${commitData.commit.message}` }
+
+                    if(!commitHash.some(entry => entry.directory === dirData.directory)){
+                        commitHash.push(dirData)
+                    }
                 }
 
             }
@@ -124,11 +148,12 @@ function getBuildFiles(dir){
     }).catch(() => console.error(`Get build files error enountered`))
 }
 
-function setupBuildsPage(dir, buildFilesArray){
+function setupBuildsPage(commitData, buildFilesArray){
     return new Promise(async (resolve, reject) =>{
-        const user = dir[3]
-        const repo = dir[4]
-        const commitHash = dir[6]
+        const obj = commitData.directory.split('/')
+        const user = obj[3]
+        const repo = obj[4]
+        const commitHash = obj[6]
 
         const elementContainer = dom.window.document.querySelector("div.maindiv")
         const repoDiv = dom.window.document.querySelector(`div.${repo.toLowerCase()}`)
@@ -142,8 +167,7 @@ function setupBuildsPage(dir, buildFilesArray){
         }
 
         if(!dom.window.document.querySelector(`div.${repo.toLowerCase()}`).innerHTML.includes(commitHash)){
-            const commitData = await getCommitDetails(user, repo, commitHash)
-            const domFinal = await appendToAddonDiv(dom, dir, buildFilesArray, commitData)
+            const domFinal = await appendToAddonDiv(dom, obj, buildFilesArray, commitData)
 
             await parseToFile(domFinal, repo, commitHash)
 
@@ -156,10 +180,19 @@ function setupBuildsPage(dir, buildFilesArray){
 
 async function getCommitDetails(user, repo, commitHash){
     return new Promise(async (resolve, reject) => {
-       const response = await fetch(`https://api.github.com/repos/${user}/${repo}/commits/${commitHash}`)
-       const data = await response.json()
-        
-       resolve(data)
+        try{
+            const response = await fetch(`https://api.github.com/repos/${user}/${repo}/commits/${commitHash}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'token ' + `${process.env.API_KEY}` 
+                }
+            })
+            const data = await response.json()
+                
+            resolve(data)
+        } catch(error){
+            reject()
+        }
     }).catch(() => console.error(`Get commit details error enountered`))
 }
 
@@ -224,9 +257,9 @@ function innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData){
                     <div class="modal-footer"></div>
                     ${buildModalBody}
                     <div class="modal-footer"></div>
-                    <div class="modal-body"><strong>Commit Date:</strong> <br/><br>${new Date(commitData.commit.author.date).toString()}</div>
+                    <div class="modal-body"><strong>Commit Date:</strong> <br/><br>${new Date(commitData.date).toString()}</div>
                     <div class="modal-footer"></div>
-                    <div class="modal-body"><strong>Commit Description:</strong> <br/><br>${commitData.commit.message}</div>
+                    <div class="modal-body"><strong>Commit Description:</strong> <br/><br>${commitData.commit_message}</div>
                     <div class="modal-footer"></div>
         
                 </div>

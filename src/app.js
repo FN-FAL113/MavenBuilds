@@ -6,9 +6,12 @@ require('dotenv').config();
 
 startTask();  
 
-function startTask(){ 
-    start()
-        .then((repos) => cloneRepo(repos))
-            .then((repos) => buildAndTransferFiles(repos))
-                .then((repos) => commitToBuilds(repos))
+async function startTask(){ 
+    const repos = await start()
+    
+    await cloneRepo(repos)
+    
+    await buildAndTransferFiles(repos)
+
+    await commitToBuilds(repos)
 }

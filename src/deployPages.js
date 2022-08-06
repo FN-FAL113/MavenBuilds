@@ -15,7 +15,6 @@ require('dotenv').config()
 
 let dom = null;
 let commitHash = []
-let sortedCommitHash = []
 
 const repoOwner = "FN-FAL113"
 const repos = ['FN_FAL113-Pages', 'MavenBuilds']

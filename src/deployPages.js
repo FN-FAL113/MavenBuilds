@@ -201,7 +201,7 @@ function appendToAddonDiv(dom, dir, buildFilesArray, commitData){
 
         const innerDiv = dom.window.document.createElement('div')
 
-        innerDiv.className = "col-3 me-auto py-2";
+        innerDiv.className = "col-auto mx-auto text-center py-2";
 
         addonDiv.appendChild(innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData));
 
@@ -237,7 +237,7 @@ function innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData){
     
 
     innerDiv.innerHTML = `
-        <button type="button" class="btn btn-sm btn-primary window-fill me-auto" data-toggle="modal" data-target="#exampleModal${commitHashLowerCase}">
+        <button type="button" class="btn btn-sm btn-primary window-fill" data-toggle="modal" data-target="#exampleModal${commitHashLowerCase}">
         ${commitHash}
         </button>
     

@@ -241,7 +241,7 @@ function innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData){
         ${commitHash}
         </button>
     
-        <div class="modal" data-backdrop="false" id="exampleModal${commitHashLowerCase}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal text-start" data-backdrop="false" id="exampleModal${commitHashLowerCase}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-fill" role="document">
                 <div class="modal-content bgOpaqueDarkModal com-${commitHashLowerCase}">
                     

@@ -122,7 +122,12 @@ async function buildAndTransferFiles(repos){
 
                 console.log(`\nCompiling ${repository}`)
 
-                await checkCommitMessage(repoOwner, repository)
+                const ciSkip = await checkCommitMessage(repoOwner, repository)
+                
+                if(ciSkip){
+                    continue
+                }
+
                 const isExistingCommit = await checkIfDirExist(repoOwner, repository, branch, buildsRepo)
               
                 if(isExistingCommit){  
@@ -171,9 +176,9 @@ function checkCommitMessage(repoOwner, repo){
         if(commitMessage.includes('[ci skip]') || commitMessage.includes('[CI SKIP]')){
             console.log(`\nSkipping ${repo} build because of commit message`)
 
-            reject(false)
+            resolve(true)
         } else {
-            resolve()
+            resolve(false)
         }
     })
 }

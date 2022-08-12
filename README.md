@@ -4,6 +4,8 @@
 
 Gets served/deployed in my personal website everytime a successful build push is initiated
 
+<a href="https://fnfal113.tech/builds" target="_blank">FN MavenBuilds Page</a>
+
 ## Brief explaination on how it works
 
 ### 1. Cloning

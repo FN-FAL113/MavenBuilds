@@ -6,7 +6,7 @@ Gets served/deployed in my personal website everytime a successful build push is
 
 <a href="https://fnfal113.tech/builds" target="_blank">FN MavenBuilds Page</a>
 
-## Brief explaination on how it works
+## How it works
 
 ### 1. Cloning
 This current build repo gets cloned and used as local directory<br/>
@@ -84,6 +84,9 @@ Contents are inside a json literal array<br/>
     }
 ]
 ```
+
+## To Do
+- refactoring (cleaning up the mess)
 
 ## Usage
 1. Clone this maven builds repo then extract the zip file

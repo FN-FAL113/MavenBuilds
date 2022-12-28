@@ -4,6 +4,8 @@
 // Author: FN_FAL113 (https://github.com/FN-FAL113/)
 // License: GNU General Public License v3.0
 
+// TODO: function documentation
+
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
@@ -18,7 +20,6 @@ let commitHash = []
 
 const repoOwner = "FN-FAL113"
 const repos = ['FN_FAL113-Pages', 'MavenBuilds']
-
 
 start()
 

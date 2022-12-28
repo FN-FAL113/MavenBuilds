@@ -14,7 +14,6 @@
     "jsdom": "^20.0.0",
     "maven": "^5.0.0",
     "node-fetch": "^2.6.7",
-    "pom-parser": "^1.2.0",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {

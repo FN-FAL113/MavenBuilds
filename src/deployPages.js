@@ -237,11 +237,11 @@ function innerElementButtonModal(innerDiv, dir, buildFilesArray, commitData){
     
 
     innerDiv.innerHTML = `
-        <button type="button" class="btn btn-sm btn-primary window-fill" data-toggle="modal" data-target="#exampleModal${commitHashLowerCase}">
+        <button type="button" class="btn btn-sm btn-primary fadeIn" data-toggle="modal" data-target="#exampleModal${commitHashLowerCase}">
         ${commitHash}
         </button>
     
-        <div class="modal text-start" data-backdrop="false" id="exampleModal${commitHashLowerCase}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal text-start fadeIn" data-backdrop="false" id="exampleModal${commitHashLowerCase}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-fill" role="document">
                 <div class="modal-content bgOpaqueDarkModal com-${commitHashLowerCase}">
                     

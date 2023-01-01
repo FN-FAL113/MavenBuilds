@@ -280,7 +280,7 @@ function checkCommitDir(repoOwner, repo, branch, buildsRepo){
  * @returns {Promise} a resolved or rejected promise
  */
 function createCommitDir(repoOwner, repo, branch, buildsRepo, currentCommit){
-    const mkdirArgs = `mkdir "./repos" "./repos/${repoOwner}" "./repos/${repoOwner}/${repo}" "./repos/${repoOwner}/${repo}/${branch}" "./repos/${repoOwner}/${repo}/${branch}/${currentCommit}"`
+    const mkdirArgs = `mkdir -p "./repos" "./repos/${repoOwner}" "./repos/${repoOwner}/${repo}" "./repos/${repoOwner}/${repo}/${branch}" "./repos/${repoOwner}/${repo}/${branch}/${currentCommit}"`
 
     return new Promise(async (resolve, reject) => {
         await child_process(`cd ./repos/${repoOwner}/${buildsRepo} && ${mkdirArgs}`)

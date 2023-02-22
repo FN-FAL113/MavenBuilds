@@ -1,4 +1,4 @@
-# <img src="https://seeklogo.com/images/A/apache-logo-89257496F9-seeklogo.com.png" with="20px" height="25px"> MavenBuilds
+# MavenBuilds
 
 "Continous Integration/Deployment Service" for java maven packages
 

@@ -2,9 +2,7 @@
 
 "Continous Integration/Deployment Service" for java maven packages
 
-Gets served/deployed in my personal website everytime a successful build push is initiated
-
-<a href="https://fnfal113.tech/builds" target="_blank">FN MavenBuilds Page</a>
+Maven packages are uploaded to this repo unless builds repo is edited inside ```./resources/repos.json```
 
 ## How it works
 

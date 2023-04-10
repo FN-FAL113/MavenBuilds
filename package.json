@@ -1,7 +1,7 @@
 {
   "name": "mavenbuilds",
   "version": "1.0.0",
-  "description": "Clones a maven repository and builds it",
+  "description": "Clones a maven github repository and builds it",
   "main": "app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -11,10 +11,9 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "dotenv": "^16.0.1",
-    "jsdom": "^20.0.0",
+    "jsdom": "^20.0.3",
     "maven": "^5.0.0",
-    "node-fetch": "^2.6.7",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.5.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"

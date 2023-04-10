@@ -1,0 +1,2 @@
+always commit specific changes to files via github dekstop or github web.
+this is to prevent overriding the repos folder contents which is used as the directory for cloning repos during testing and development

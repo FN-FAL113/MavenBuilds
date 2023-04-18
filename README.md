@@ -84,8 +84,9 @@ Contents are inside a json literal array<br/>
 ```
 
 ## To Do
-- refactoring (cleaning up the mess)
+- refactoring (cleaning up the mess if necessary)
 - modulation
+- move to typescript
 
 ## Usage
 1. Clone this maven builds repo then extract the zip file

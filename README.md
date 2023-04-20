@@ -2,7 +2,7 @@
 
 "Continous Integration/Deployment Service" for java maven packages
 
-Maven packages are uploaded to this repo unless builds repo is edited inside ```./resources/repos.json```
+Maven packages are uploaded to this repo unless builds repo is edited inside ```./resources/repos.json```<br>
 Defaults to ```mvn clean package```
 
 ## How it works

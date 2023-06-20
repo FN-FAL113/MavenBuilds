@@ -4,9 +4,9 @@ on:
   # Manual workflow trigger
   workflow_dispatch: {}
 
-  # Run every ~30 minutes
+  # Run every 24 hours (midnight)
   schedule:
-  - cron: '*/30 * * * *'
+  - cron: '0 0 * * *'
   
   
 jobs:

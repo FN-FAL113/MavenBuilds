@@ -1,17 +1,13 @@
 // Author: FN_FAL113 (https://github.com/FN-FAL113/)
 // License: GNU General Public License v3.0
-const { repoResources, cloneRepo, buildAndTransferFiles, commitPushToBuilds } = require('./main')
-
-require('dotenv').config();
-
-startTask();  
+const { getRepoResource, start } = require('./main')
 
 async function startTask(){ 
-    const repos = await repoResources()
-    
-    await cloneRepo(repos)
-    
-    await buildAndTransferFiles(repos)
+    const repos = await getRepoResource()
 
-    await commitPushToBuilds(repos)
+    if(!repos) return
+
+    await start(repos)
 }
+
+startTask(); 

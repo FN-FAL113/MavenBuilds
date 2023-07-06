@@ -5,6 +5,8 @@ on:
   workflow_dispatch:
   # On workflow call 
   workflow_call:
+  # Outside caller
+  repository_dispatch:
 
   # Run every night (midnight)
   schedule:

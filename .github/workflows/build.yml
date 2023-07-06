@@ -2,7 +2,9 @@ name: Auto Deploy Maven
 
 on:
   # Manual workflow trigger
-  workflow_dispatch: {}
+  workflow_dispatch:
+  # On workflow call 
+  workflow_call:
 
   # Run every night (midnight)
   schedule:

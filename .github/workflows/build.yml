@@ -45,6 +45,7 @@ jobs:
         
   check_storage:
     runs-on: ubuntu-latest
+    needs: [build]
     steps:
       - name: list files
         run: |

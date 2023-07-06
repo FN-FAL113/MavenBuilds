@@ -42,3 +42,11 @@ jobs:
 
       - name: Running maven builder and committer
         run: npm start
+        
+  check_storage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: list files
+        run: |
+          ls -a
+  

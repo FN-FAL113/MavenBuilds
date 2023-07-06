@@ -41,8 +41,8 @@ async function getRepoResource(){
 async function start(repos){
     // delete locally cloned repositories
     for(const repo of repos) {   
-        await delDirectoryIfExist(`./repos/${repo.github_username}/${repo.repository}`)
-            .catch((err) => console.log(`\n${new Date(Date.now())}: "${`./repos/${repo.github_username}/${repo.repository}`}" does not exist or empty, skipping directory deletion.`))
+        await delDirectoryIfExist(`./cloned_repos/${repo.github_username}/${repo.repository}`)
+            .catch((err) => console.log(`\n${new Date(Date.now())}: "${`./cloned_repos/${repo.github_username}/${repo.repository}`}" does not exist, skipping directory deletion.`))
     }
 
     const promises = []
@@ -54,21 +54,22 @@ async function start(repos){
         const buildsRepo = repos[0].repository
 
         if(repository === repos[0].repository){
-            await child_process(`git clone -b ${branch} https://${repos[0].github_username}:${process.env.API_KEY}@github.com/${repoOwner}/${repository}.git repos/${repoOwner}/${repository}`)
+            await child_process(`git clone -b ${branch} https://${repos[0].github_username}:${process.env.API_KEY}@github.com/${repoOwner}/${repository}.git cloned_repos/${repoOwner}/${repository}`)
                 .catch((err) => console.error(`\n${new Date(Date.now())}: Failed to clone "${repository}", please debug locally.`))
             
             continue
         } 
 
-        const commitData = await getLatestCommitHashAndMessage(repoOwner, repository)
+        // retrieve commit hash and message for this repo
+        const [latestCommitHash, commitMessage] = await getLatestCommitHashAndMessage(repoOwner, repository)
 
         // if commit message contains "[ci skip]"
-        if(await checkCommitMessage(repository, commitData[1])){
+        if(await checkCommitMessage(repository, commitMessage)){
             continue
         }
         
         // if existing named commit directory exist in the maven builds repo
-        if(await checkCommitDir(repoOwner, repository, branch, buildsRepo, commitData[0])){  
+        if(await checkCommitDir(repoOwner, repository, branch, buildsRepo, latestCommitHash)){  
             continue 
         }
 
@@ -81,12 +82,12 @@ async function start(repos){
                 (err) => console.error(`\n${new Date(Date.now())}: Failed to clone "${repository}", please debug locally.`)
             )
             .then(
-                () => buildAndTransferFiles(repoOwner, repository, branch, buildsRepo, commitData[0]), 
-                (err) => console.error(`\n${new Date(Date.now())}: Set "${repository}" pom final jar name error: ` + err)
+                () => buildAndTransferFiles(repoOwner, repository, branch, buildsRepo, latestCommitHash), 
+                (err) => console.error(`\n${new Date(Date.now())}: Set pom final jar name for "${repository}" error encountered: ` + err)
             )
             .then(
                 () => console.log(`\n${new Date(Date.now())}: Task for "${repository}" finished successfully.`), 
-                (err) => console.error(`\n${new Date(Date.now())}: Build "${repository}" and transfer output files error encountered, please debug locally.`)
+                (err) => console.error(`\n${new Date(Date.now())}: Build and transfer output files for "${repository}" error encountered, please debug locally.`)
             )
         )
     }
@@ -153,7 +154,7 @@ async function setPomFinalJarName(repoOwner, repo){
     return new Promise(async (resolve, reject) => {
         try {
             // read XML file
-            const xmlData = await readFile(`./repos/${repoOwner}/${repo}/pom.xml`, 'utf8')
+            const xmlData = await readFile(`./cloned_repos/${repoOwner}/${repo}/pom.xml`, 'utf8')
     
              // convert XML data to JSON object
             const parsedXml = await xml2js_parse_string(xmlData)
@@ -166,7 +167,7 @@ async function setPomFinalJarName(repoOwner, repo){
             const xml = builder.buildObject(parsedXml);
 
             // overwrite the pom file, we don't wanna append it
-            await writeFile(`./repos/${repoOwner}/${repo}/pom.xml`, xml)
+            await writeFile(`./cloned_repos/${repoOwner}/${repo}/pom.xml`, xml)
 
             console.log(`\n${new Date(Date.now())}: Successfully updated "${repo}" pom.xml.`);
 
@@ -194,7 +195,7 @@ async function buildAndTransferFiles(repoOwner, repo, branch, buildsRepo, latest
             await mavenBuild(repoOwner, repo, branch, buildsRepo, latestCommitHash)
 
             resolve()
-        } catch(error){
+        } catch(error) {
             reject(error)
         }
     })
@@ -213,7 +214,7 @@ async function buildAndTransferFiles(repoOwner, repo, branch, buildsRepo, latest
 async function mavenBuild(repoOwner, repo, branch, buildsRepo, latestCommitHash){
     return mvn.create({
         // the working directory that maven will build upon
-        cwd: `./repos/${repoOwner}/${repo}`,
+        cwd: `./cloned_repos/${repoOwner}/${repo}`,
     }).execute(['clean', 'package' ,`-lbuild.txt`], { 'skipTests': true }).then(async () => {
         console.log(`\n${new Date(Date.now())}: Successfully compiled "${repo}".`)
 
@@ -222,7 +223,7 @@ async function mavenBuild(repoOwner, repo, branch, buildsRepo, latestCommitHash)
     }).catch(async () => {
         await moveLogFile(repoOwner, repo, branch, buildsRepo, latestCommitHash)
 
-        throw new Error(`\n${new Date(Date.now())}: Failed to maven compile "${repo}". please check build log file.`)
+        throw new Error(`\n${new Date(Date.now())}: Failed to maven compile package for "${repo}". please check build log file.`)
     })
 }
 
@@ -268,7 +269,7 @@ async function checkCommitDir(repoOwner, repo, branch, buildsRepo, latestCommitH
         }
  
         // throws an error if path does not exist
-        await access(`./repos/${repoOwner}/${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`) 
+        await access(`./cloned_repos/${repoOwner}/${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`) 
 
         console.log(`\n${new Date(Date.now())}: Skipped clone and compile "${repo}" due to no new remote commits.`)
         
@@ -290,11 +291,11 @@ async function checkCommitDir(repoOwner, repo, branch, buildsRepo, latestCommitH
  */
 async function createCommitDir(repoOwner, repo, branch, buildsRepo, latestCommitHash){
     try {
-        await child_process(`cd ./repos/${repoOwner}/${buildsRepo} && mkdir "./repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}"`)
+        await child_process(`cd ./cloned_repos/${repoOwner}/${buildsRepo} && mkdir "./cloned_repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}"`)
 
-        console.log(`\n${new Date(Date.now())}: Created "${`./repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`}" builds commit directory.`)
+        console.log(`\n${new Date(Date.now())}: Created "${`./cloned_repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`}" builds commit directory.`)
     } catch (error) {
-        console.error(`Create "${repo}" builds commit directory error encountered: (debug locally for security reasons)` + "" /** error **/)
+        console.error(`Create "${repo}" builds commit directory error encountered: (debug locally for security)` + "" /** error **/)
     }
 }
 
@@ -311,18 +312,18 @@ async function createCommitDir(repoOwner, repo, branch, buildsRepo, latestCommit
 async function moveJarFile(repoOwner, repo, branch, buildsRepo, latestCommitHash){
     try {
         // read XML file
-        const xmlData = await readFile(`./repos/${repoOwner}/${repo}/pom.xml`, 'utf8')
+        const xmlData = await readFile(`./cloned_repos/${repoOwner}/${repo}/pom.xml`, 'utf8')
 
         // convert XML data to JSON object
         const parsedXml = await xml2js_parse_string(xmlData)
 
         const jarName = `"` + parsedXml.project.name[0] + " v" + parsedXml.project.version[0] + ".jar" + `"`
 
-        await child_process(`cd ./repos/${repoOwner}/${repo}/target && ${moveCmd} ${jarName} ../../${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}` )
+        await child_process(`cd ./cloned_repos/${repoOwner}/${repo}/target && ${moveCmd} ${jarName} ../../${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}` )
 
-        console.log(`\n${new Date(Date.now())}: Successfully transferred "${repo}" jar file.`)
-    }catch(error) {
-        console.log(`\n${new Date(Date.now())}: Error moving "${repo}" jar file: ` + error)   
+        console.log(`\n${new Date(Date.now())}: Successfully transferred jar file for "${repo}".`)
+    } catch(error) {
+        console.log(`\n${new Date(Date.now())}: Error moving jar file for "${repo}": ` + error)   
     }
 }
 
@@ -339,11 +340,11 @@ async function moveJarFile(repoOwner, repo, branch, buildsRepo, latestCommitHash
  */
 async function moveLogFile(repoOwner, repo, branch, buildsRepo, latestCommitHash){
     try {
-        await child_process(`cd ./repos/${repoOwner}/${repo} && ${moveCmd} "build.txt" ../${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`)
+        await child_process(`cd ./cloned_repos/${repoOwner}/${repo} && ${moveCmd} "build.txt" ../${buildsRepo}/repos/${repoOwner}/${repo}/${branch}/${latestCommitHash}`)
 
-        console.log(`\n${new Date(Date.now())}: Successfully transferred "${repo}" build logs.`)
-    }catch(error) {
-        console.error(`\n${new Date(Date.now())}: Error encountered while transferring ${repo} build logs. please debug locally.`)  
+        console.log(`\n${new Date(Date.now())}: Successfully transferred build logs for "${repo}".`)
+    } catch(error) {
+        console.error(`\n${new Date(Date.now())}: Error encountered while transferring build logs for "${repo}". please debug locally.`)  
     }
 }
 
@@ -360,16 +361,14 @@ async function commitPushToBuildsRepo(repos){
         const gitCommit = `git commit -m "${process.env.ACTION_NAME} #${process.env.RUN_ID}"`
         
         try{
-            await child_process(`cd ./repos/${repos[0].github_username}/${repos[0].repository}/ && ${setConfUser} && git add . && ${gitCommit} && git push origin`)
+            await child_process(`cd ./cloned_repos/${repos[0].github_username}/${repos[0].repository}/ && ${setConfUser} && git add . && ${gitCommit} && git push origin`)
           
-            console.log(`\n${new Date(Date.now())}: Successfully committed changes "${repos[0].repository}" remote repository.`)
+            console.log(`\n${new Date(Date.now())}: Successfully committed changes to remote builds repository (${repos[0].repository}).`)
 
             resolve()
         } catch (error) {
-            // will be caught by this promise object
-            reject(`\n${new Date(Date.now())}: Nothing to commit on "${repos[0].repository}" remote repository.`) 
+            reject(`\n${new Date(Date.now())}: Nothing to commit on remote builds repository (${repos[0].repository}).`) 
         }
-        
     }).catch((error) => console.error(error))
 }
 

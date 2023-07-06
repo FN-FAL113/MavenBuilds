@@ -9,12 +9,9 @@
   "author": "FN_FAL113",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.3.1",
     "maven": "^5.0.0",
-    "node-fetch": "^2.6.11",
-    "xml2js": "^0.5.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.19"
+    "node-fetch": "^3.3.1",
+    "xml2js": "^0.6.0"
   }
 }

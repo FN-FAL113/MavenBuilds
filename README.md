@@ -48,7 +48,7 @@ root directory of the target repo.
 
 ### 5. Transferring build files
 If the build for a repo is successfull then build files including the packaged<br/>
-jar and build log else only log file get transferred to the aforementioned [cloned builds output directory](#build_output_directory)<br/>
+jar and build log else only log file get transferred to the aforementioned [cloned builds output directory](#builds_output_directory)<br/>
 
 ### 6. Commit to build repo
 Lastly, we commit our changes to the builds repo, the changes includes our<br/>

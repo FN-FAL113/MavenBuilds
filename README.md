@@ -17,7 +17,7 @@ automatically deleted before starting the cloning process
 
 Cloned repositories directory:
 
-``./repos/{username}/<cloned repo dirs>``<br/>
+``./cloned_repos/{username}/<cloned repo dirs>``<br/>
 
 ### 2. Setting pom final name
 Once a target repo gets cloned, the maven pom.xml for each repository<br/>
@@ -27,28 +27,28 @@ for the jar after a successful maven lifecycle build
 
 ### 3. Creation of build output directories
 Before proceeding to maven lifecycle build, build output directories are created<br/>
-inside the clone of our said builds repo where it takes the username,<br/>
-targetRepo, branch and the currentCommit hash as the subdirectories.
+inside the cloned builds repo where it takes the target repo owner username,<br/>
+repo name, branch and the current/latest commit hash as the subdirectories.
 
+<a name="builds_output_directory"></a>
+```
 Build output Directory:
 
-``./repos/{username}/{buildsRepo}/repos/{username}/{repo}/{branch}/{currentCommitHash}``<br/>
+./cloned_repos/{username}/{buildsRepo}/repos/{username}/{repo}/{branch}/{currentCommitHash}
+```
 
-If the current commit hash from the target repo exist as a subdirectory<br/>
-then maven build for that specific repo is skipped since there are no new commits<br/>
-Any skipped target repos automatically proceeds to other<br/>
-target repos for build output directory creation and so on.
+If the current commit hash from the target repo exist as subdirectory<br/>
+then maven build for that specific repo will be skipped since there are no new commits<br/>
 
 ### 4. Maven Build
 After successfully creating the build output directories which means there are<br/>
-new commits from our target repo, a maven lifecycle build gets initiated using<br/>
+new commits from our target repository, a maven lifecycle build gets initiated using<br/>
 'clean package' as the command. The logs for the build gets outputted in the<br/>
 root directory of the target repo. 
 
 ### 5. Transferring build files
 If the build for a repo is successfull then build files including the packaged<br/>
-jar and build.txt else only build.txt get transferred to the aforementioned build<br/>
-output directory above.
+jar and build log else only log file get transferred to the aforementioned [cloned builds output directory](build_output_directory)<br/>
 
 ### 6. Commit to build repo
 Lastly, we commit our changes to the builds repo, the changes includes our<br/>
@@ -85,9 +85,8 @@ Contents are inside a json literal array<br/>
 ```
 
 ## To Do
-- refactoring (cleaning up the mess if necessary)
+- refactoring (cleaning up mess if necessary)
 - modulation
-- move to typescript
 
 ## Usage
 1. Clone this maven builds repo then extract the zip file
@@ -100,10 +99,10 @@ Contents are inside a json literal array<br/>
 
 5. Change the maven build life cycle command if necessary inside main.js
 
-6. Supply needed environment variables (API_KEY and EMAIL)<br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;- You may setup your own github workflow env variables
-
-&nbsp;&nbsp;&nbsp;&nbsp;- An example workflow I made for this builds repo: [build.yml](https://github.com/FN-FAL113/MavenBuilds/blob/main/.github/workflows/build.yml)
+6. Supply needed environment variables like ```API_KEY``` and ```EMAIL```, propagate github action secrets if necessary<br/>
 
 7. Run ```npm start```
+
+## CI/CD Through Github Actions
+- An example workflow I made for this builds repo: [deploy.yml](https://github.com/FN-FAL113/MavenBuilds/blob/main/.github/workflows/deploy.yml)
+- An example workflow that I also wrote for a target repo that triggers the deploy workflow file on this builds repo on push: [deploy.yml](https://github.com/FN-FAL113/FN-FAL-s-Amplifications/blob/main/.github/workflows/deploy.yml)

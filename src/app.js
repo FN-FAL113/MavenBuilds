@@ -3,11 +3,9 @@
 const { getRepoResource, start } = require('./main')
 
 async function startTask(){ 
-    const repos = await getRepoResource()
+    await getRepoResource()
 
-    if(!repos) return
-
-    await start(repos)
+    await start()
 }
 
 startTask(); 

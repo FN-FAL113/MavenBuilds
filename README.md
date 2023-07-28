@@ -23,8 +23,8 @@ Cloned repositories directory:
 ### 2. Creation of build output directories for each target repo
 Before proceeding to maven lifecycle build, the latest commit hash from a target repo is fetched to check whether a commit hash named subdirectory exists.
 
-If commit hash subdirectory exist then maven lifecycle build is skipped<br/>
-else the build output directories are created inside the cloned builds<br/>
+If a commit hash named subdirectory exist then maven lifecycle build is skipped<br/>
+otherwise the build output directories are created inside the cloned builds<br/>
 repo where it takes the target repo object properties as subdirectories.
 
 <a name="builds_output_directory">Builds Output Directory:</a>

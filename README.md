@@ -8,24 +8,23 @@ Defaults to ```clean package``` lifecycle build.
 ## :interrobang: The Process
 
 ### 1. Cloning builds and target repos
-remote builds repo is cloned (first object inside resource file).
+Existing local directories are deleted before executing this step.
 
-Each object (target repo) starting from index 1 inside resource<br/>
-file are looped for cloning, building and remote push.<br/><br/>
-If there are existing local directories, it will be<br/>
-automatically deleted before starting the cloning process
+Remote builds repo gets cloned (first object inside resource file).
+
+Each target repo starting from index 1 inside resource file<br/>
+are looped for cloning and building.<br/><br/>
 
 Cloned repositories directory:
 
-``./cloned_repos/{repoOwner}/<cloned repo dirs>``<br/>
-
+``./cloned_repos/{repoOwner}/<clonedRepoName>``<br/>
 
 ### 2. Creation of build output directories for each target repo
-Before proceeding to maven lifecycle build, the latest commit hash from a target repo is fetched to check whether a commit hash named subdirectory exists.
+Before proceeding to maven lifecycle build, the latest commit hash from a target<br/>
+repo is fetched to check whether a commit hash named subdirectory exists.
 
-If a commit hash named subdirectory exist then maven lifecycle build is skipped<br/>
-otherwise the build output directories are created inside the cloned builds<br/>
-repo where it takes the target repo object properties as subdirectories.
+If a commit hash named subdirectory exist then maven lifecycle build will be skipped<br/>
+otherwise the build output directories are created inside the builds repo.<br/>
 
 <a name="builds_output_directory">Builds Output Directory:</a>
 ```
@@ -33,17 +32,17 @@ repo where it takes the target repo object properties as subdirectories.
 ```
 
 ### 3. Building target repo
-After successfully creating the build output directories if no commit hash 
-subdirectory exist, a maven lifecycle build gets initiated using<br/> 
-'clean package' as the command. The build log gets created<br/>
+After creating the build output directories and no commit hash<br/> 
+subdirectory exist, a maven lifecycle build is initiated using<br/> 
+'clean package' as the life cycle command. The build log gets created<br/>
 in the root directory of the current target repo. 
 
 ### 4. Transferring target repo build files
-If maven lifecycle build is successful then output files which are the packaged<br/>
-jar and build log else get transferred to the aforementioned [cloned builds output directory](#builds_output_directory) else only log file will get transferred<br/>
+If maven lifecycle build is successful then output files (jar + logs) are the packaged<br/>
+and transferred to the [cloned builds output directory](#builds_output_directory) else only log file will get transferred<br/>
 
-### 5. Commit and push to builds repo
-After looping the target repos, we commit and push any changes to the builds repo, these changes are any created commit hash directory where build files are transffered.<br/>
+### 5. Commit and push to remote builds repo
+These changes are the new commit hash directory where the build files are transferred.<br/>
 
 ## Assigning builds repo and target repos
 Inside ```./resources/repos.json```, where you will be adding the needed builds repo and target repos<br/>
